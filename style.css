@@ -13,7 +13,7 @@ button:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px 
 .header h1 { font-size: clamp(40px, 6.2vw, 70px); line-height: 1.07; letter-spacing: -3px; font-weight: 800; }
 .header h1 span { color: var(--purple); }
 .header > p { color: var(--muted); margin: 22px 0 42px; font-size: 16px; line-height: 1.7; }
-.games { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.games { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
 .game-card { display: flex; flex-direction: column; text-align: left; color: var(--text); padding: 26px; border: 1px solid #ffffff20; border-radius: 24px; background: linear-gradient(145deg, #332442, #221b31); overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s; }
 .xo-card { background: linear-gradient(145deg, #233537, #1c272e); }
 .game-card:hover { transform: translateY(-5px); border-color: #c5a1ff80; box-shadow: 0 18px 50px #0003; }
@@ -34,6 +34,22 @@ button:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px 
 footer { padding: 32px 0; text-align: center; color: var(--muted); font-size: 12px; }
 footer span { margin-left: 8px; color: var(--purple); }
 .hidden { display: none !important; }
+.draw-card { background: linear-gradient(145deg, #493040, #282037); }
+.draw-game label { display: block; text-align: left; margin-top: 16px; color: var(--muted); font-size: 13px; }
+.draw-game .text-input { text-transform: none; letter-spacing: 0; margin-top: 7px; }
+.draw-players { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 16px 0; }
+.draw-players span { background: #ffffff0c; padding: 8px 12px; border-radius: 12px; font-size: 13px; overflow-wrap: anywhere; }
+.draw-word { padding: 18px 12px; background: #c5a1ff14; border-radius: 12px; font-weight: 700; margin: 16px 0; }
+.draw-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+.draw-tools label { margin: 0; display: flex; align-items: center; gap: 6px; }
+.draw-tools .secondary-btn { width: auto; margin: 0; padding: 8px 12px; }
+.draw-tools select { padding: 7px; border-radius: 7px; }
+#drawCanvas { display: block; width: 100%; height: auto; background: white; border-radius: 12px; }
+#drawCanvas.can-draw { touch-action: none; cursor: crosshair; }
+.draw-guess { display: flex; align-items: center; gap: 8px; }
+.draw-guess .primary-btn { width: auto; }
+.draw-guesses { padding: 10px 20px; text-align: left; max-height: 190px; overflow-y: auto; font-size: 14px; overflow-wrap: anywhere; }
+.draw-guesses li { margin: 5px 0; }
 .in-game .header .eyebrow, .in-game .header h1, .in-game .header > p { display: none; }
 .in-game .brand { margin-bottom: 32px; }
 .game-container, .game-manual { max-width: 640px; margin: auto; }

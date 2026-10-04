@@ -1,4 +1,18 @@
 export const manuals = {
+    draw: `<details class="manual" open>
+        <summary><span>🎨 How to Play <small>DRAW & GUESS · EVERY DRAWING COUNTS</small></span></summary>
+        <div class="manual-content">
+            <p>Create a room and share its code with 1–9 friends. Each player needs their own browser or device.</p>
+            <ol><li>Enter your name, then create or join a room.</li>
+                <li>The host starts once everyone has joined. Each player draws twice.</li>
+                <li>The drawer sees a secret prompt and has 90 seconds to draw it. Use the ink and brush controls; fingers and pens work too.</li>
+                <li>Everyone else guesses. Each correct guess earns 100 points. Guesses go privately to the drawer, who must keep their browser open to check them.</li>
+                <li>The drawer advances when ready. After time expires, the host can also advance if the drawer disconnects.</li></ol>
+            <p>Draw shapes instead of writing the answer. Funny prompts may be whole situations! Capitalization, punctuation, and a leading “a”, “an”, or “the” do not matter when guessing.</p>
+            <p>Over 1,200 local prompts cover 12 categories, mostly easy or medium. Room history prevents repeated prompts, and category changes keep rounds varied. Create a new room after the game to play again.</p>
+            <p>If you refresh, enter the same room code in the same browser to resume. Your word remains private to the current drawer.</p>
+        </div>
+    </details>`,
     spy: `<details class="manual" open>
         <summary><span>🕵️ How to Play <small>SPY · THE FIELD GUIDE</small></span></summary>
         <div class="manual-content">

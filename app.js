@@ -7,6 +7,10 @@ const gameContainer = document.getElementById("gameContainer");
 const gameManual = document.getElementById("gameManual");
 
 const games = {
+    draw: async () => {
+        const { openDraw } = await import("./games/draw.js");
+        await openDraw(gameContainer);
+    },
     spy: () => openSpy(gameContainer),
     xo: async () => {
         const { openXO } = await import("./games/xo.js");
