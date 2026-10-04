@@ -1,0 +1,39 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$room": {
+        ".read": "auth !== null && (data.child('status').val() === 'waiting' || data.child('players').child('X').val() === auth.uid || data.child('players').child('O').val() === auth.uid)",
+        ".write": "auth !== null && ((!data.exists() && newData.child('host').val() === auth.uid && newData.child('players').child('X').val() === auth.uid && newData.child('players').child('O').val() === null && newData.child('status').val() === 'waiting' && newData.child('turn').val() === 'X' && newData.child('winner').val() === null) || (data.exists() && data.child('players').child('X').val() === auth.uid && newData.child('host').val() === data.child('host').val()) || (data.exists() && data.child('players').child('O').val() === null && newData.child('players').child('X').val() === data.child('players').child('X').val() && newData.child('players').child('O').val() === auth.uid && newData.child('status').val() === 'playing'))",
+        ".validate": "newData.hasChildren(['host','status','turn','winner','board','players'])",
+        "host": {
+          ".validate": "newData.isString()"
+        },
+        "status": {
+          ".validate": "newData.val() === 'waiting' || newData.val() === 'playing' || newData.val() === 'finished'"
+        },
+        "turn": {
+          ".validate": "newData.val() === 'X' || newData.val() === 'O'"
+        },
+        "winner": {
+          ".validate": "newData.val() === null || newData.val() === 'X' || newData.val() === 'O' || newData.val() === 'draw'"
+        },
+        "players": {
+          "X": {
+            ".validate": "newData.isString()"
+          },
+          "O": {
+            ".validate": "newData.val() === null || newData.isString()"
+          }
+        },
+        "board": {
+          ".validate": "newData.hasChildren(['0','1','2','3','4','5','6','7','8'])",
+          "$cell": {
+            ".validate": "$cell === '0' || $cell === '1' || $cell === '2' || $cell === '3' || $cell === '4' || $cell === '5' || $cell === '6' || $cell === '7' || $cell === '8'"
+          }
+        }
+      }
+    }
+  }
+}

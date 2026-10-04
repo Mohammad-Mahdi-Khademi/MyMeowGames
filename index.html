@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#141020">
+    <title>Meow Daran · Game night starts here</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container">
+        <header class="header">
+            <div class="brand"><span aria-hidden="true">🐾</span> MEOW DARAN <span class="brand-tag">THE GAME ROOM</span></div>
+            <div class="eyebrow">GOOD FRIENDS. GREAT GAMES.</div>
+            <h1>A little friendly<br><span>competition.</span></h1>
+            <p>Gather your people. Pick a game. Make a night of it.</p>
+        </header>
+        <section id="gameSelection" class="games" aria-label="Choose your game">
+            <button class="game-card spy-card" onclick="openGame('spy')">
+                <span class="card-top"><span class="pill">PARTY GAME</span><span>01 /</span></span>
+                <span class="game-art spy-art" aria-hidden="true">🕵️</span>
+                <span class="card-title">Spy <span>↗</span></span>
+                <span class="card-description">One secret word. Someone on the inside.<br>Can you spot the spy?</span>
+                <span class="card-bottom"><span>3–10 players · Pass & play</span><span class="play-label">Play Spy →</span></span>
+            </button>
+            <button class="game-card xo-card" onclick="openGame('xo')">
+                <span class="card-top"><span class="pill">HEAD TO HEAD</span><span>02 /</span></span>
+                <span class="game-art xo-art" aria-hidden="true"><span>×</span><span>○</span></span>
+                <span class="card-title">XO <span>↗</span></span>
+                <span class="card-description">Your next move matters.<br>Challenge a friend, wherever they are.</span>
+                <span class="card-bottom"><span>2 players · Online</span><span class="play-label">Play XO →</span></span>
+            </button>
+        </section>
+        <section id="gameContainer" class="game-container hidden" aria-label="Game"></section>
+        <section id="gameManual" class="game-manual hidden" aria-label="Game instructions"></section>
+        <footer>Made for your kind of game night. <span aria-hidden="true">✦</span></footer>
+    </main>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
