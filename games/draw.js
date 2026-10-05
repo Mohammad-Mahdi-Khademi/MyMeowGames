@@ -52,7 +52,7 @@ export async function openDraw(container) {
                 <label>Brush <select id="drawSize"><option value="3">Fine</option><option value="7" selected>Medium</option><option value="16">Thick</option><option value="32">Extra thick</option></select></label>
                 <button id="drawClear" class="secondary-btn">Clear canvas</button></div>
             <canvas id="drawCanvas" width="800" height="500" aria-label="Shared drawing canvas"></canvas>
-            <form id="drawGuessForm" class="draw-guess"><input id="drawGuess" class="text-input" maxlength="100" placeholder="Type your guess" aria-label="Your guess" autocomplete="off"><button class="primary-btn">Guess</button></form>
+            <form id="drawGuessForm" class="draw-guess"><input id="drawGuess" class="text-input" maxlength="100" placeholder="Type a guess or message" aria-label="Your guess or message" autocomplete="off"><button class="primary-btn">Send</button></form>
             <ol id="drawGuesses" class="draw-guesses" aria-live="polite"></ol>
             <button id="drawStart" class="primary-btn">Start game · 2 turns each</button>
             <button id="drawNext" class="secondary-btn">Next round</button>
@@ -124,8 +124,8 @@ export async function openDraw(container) {
         el("drawNext").textContent = state.round >= state.total ? "Finish game" : "Next round";
         el("drawStatus").textContent = state.phase === "waiting" ? "Share the room code. Gather 2–10 players, then start." : state.phase === "finished" ? "Game finished! Create a new room to play again." : `Round ${state.round}/${state.total} · ${room.players[state.drawer] || "Player"} is drawing · ${remaining}s`;
         el("drawWord").textContent = drawing && isDrawer() && secret ? `Your word: ${CATEGORY_ICONS[secret.category]} ${secret.word.toUpperCase()} · ${secret.difficulty}` : "Drawer's word: ????";
-        el("drawGuessForm").classList.toggle("hidden", !drawing || isDrawer());
-        el("drawGuessForm").querySelector("button").disabled = remaining === 0 || !!results[user.uid];
+        el("drawGuessForm").classList.toggle("hidden", !drawing);
+        el("drawGuessForm").querySelector("button").disabled = remaining === 0;
         el("drawClear").disabled = !drawing || !isDrawer() || remaining === 0;
         el("drawCanvas").classList.toggle("can-draw", drawing && isDrawer() && remaining > 0);
     }
@@ -155,11 +155,9 @@ export async function openDraw(container) {
         const round = room.state.round, path = roundBase();
         if (isDrawer()) loadSecret(round);
         roundUnsub.push(onValue(at(`${path}/strokes`), snap => { strokes = snap.val() || {}; paint(); }, error));
-        // Guesses are readable only by their author and the current drawer.
-        // Even a correct guess never appears in another guesser's network data.
-        const guessPath = isDrawer() ? `${path}/guesses` : `${path}/guesses/${user.uid}`;
-        roundUnsub.push(onValue(at(guessPath), snap => {
-            guesses = isDrawer() ? snap.val() || {} : { [user.uid]: snap.val() || {} };
+        // All room members share the same chat/guess stream.
+        roundUnsub.push(onValue(at(`${path}/guesses`), snap => {
+            guesses = snap.val() || {};
             renderGuesses(); processGuesses();
         }, error));
         roundUnsub.push(onValue(at(`${base()}/public/scores/${round}`), snap => { results = snap.val() || {}; renderStatus(); renderGuesses(); }, error));
@@ -169,7 +167,7 @@ export async function openDraw(container) {
         if (!isDrawer() || !secret || secretRound !== room.state.round) return;
         const round = room.state.round;
         for (const [uid, entries] of Object.entries(guesses)) {
-            if (results[uid]) continue;
+            if (results[uid] || uid === room.state.drawer) continue;
             for (const [id, entry] of Object.entries(entries)) {
                 if (handled.has(id)) continue;
                 handled.add(id);
@@ -186,15 +184,21 @@ export async function openDraw(container) {
         entries.sort((a, b) => a.time - b.time);
         el("drawGuesses").replaceChildren(...entries.slice(-20).map(entry => {
             const item = document.createElement("li");
-            item.textContent = `${room.players[entry.uid] || "Player"}: ${entry.text}${results[entry.uid] ? " ✓" : ""}`;
+            item.textContent = `${room.players[entry.uid] || "Player"}: ${entry.text}`;
             return item;
         }));
+        for (const uid of Object.keys(results)) {
+            const item = document.createElement("li");
+            item.textContent = `✓ ${room.players[uid] || "Player"} guessed correctly · +100`;
+            el("drawGuesses").append(item);
+        }
+        el("drawGuesses").scrollTop = el("drawGuesses").scrollHeight;
     }
     el("drawGuessForm").onsubmit = event => {
         event.preventDefault();
         action(async () => {
             const text = el("drawGuess").value.trim();
-            if (!text || isDrawer() || now() >= room.state.deadline) return;
+            if (!text || room.state.phase !== 'drawing' || now() >= room.state.deadline) return;
             await push(at(`${roundBase()}/guesses/${user.uid}`), { text, time: now() });
             el("drawGuess").value = "";
         });

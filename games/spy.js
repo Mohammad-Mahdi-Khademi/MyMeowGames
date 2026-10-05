@@ -1,4 +1,4 @@
-const words = [
+const originalWords = [
     "Airport","Aquarium","Bakery","Beach","Bridge","Castle","Cinema","Circus","Classroom","Desert",
     "Factory","Farm","Forest","Garage","Garden","Hospital","Hotel","Island","Jungle","Kitchen",
     "Laboratory","Library","Market","Museum","Office","Palace","Park","Prison","Restaurant","School",
@@ -34,45 +34,61 @@ const words = [
     "Carnival","Circus Tent","Football Stadium","Basketball Arena","Tennis Club","Swimming Center"
 ];
 
+
+export const words = [...new Set([...originalWords,
+    'Observatory','Planetarium','Botanical Garden','Coral Reef','Glacier','Canyon','Oasis','Hot Spring',
+    'Treehouse','Igloo','Houseboat','Cable Car','Ferris Wheel','Roller Coaster','Escape Room','Bowling Alley',
+    'Pottery Studio','Dance Studio','Opera House','Flea Market','Food Truck','Rooftop Garden','Aqueduct','Harbor',
+    'Lemonade Stand','Puppet Theater','Skating Rink','Archery Range','Safari','Hot Air Balloon','Parachute','Kayak',
+    'Canoe','Sailboat','Snowmobile','Scooter','Tractor','Bulldozer','Crane','Forklift','Lifeboat','Tram',
+    'Compass','Telescope','Microscope','Binoculars','Magnifying Glass','Walkie Talkie','Drone','Satellite',
+    'Lantern','Flashlight','Thermos','Hammock','Sleeping Bag','Tent','Fishing Rod','Anchor','Ladder','Toolbox',
+    'Hammer','Screwdriver','Paintbrush','Watering Can','Wheelbarrow','Lawn Mower','Vacuum Cleaner','Toaster',
+    'Blender','Waffle Maker','Kettle','Chopsticks','Rolling Pin','Apron','Oven Mitt','Hourglass','Typewriter',
+    'Accordion','Harmonica','Flute','Trumpet','Saxophone','Harp','Tambourine','Xylophone','Ukulele','Cello',
+    'Peacock','Flamingo','Koala','Kangaroo','Panda','Sloth','Otter','Beaver','Hedgehog','Raccoon',
+    'Meerkat','Chameleon','Seahorse','Jellyfish','Starfish','Lobster','Crab','Pelican','Toucan','Woodpecker',
+    'Avocado','Coconut','Kiwi','Pomegranate','Blueberry','Raspberry','Apricot','Fig','Dates','Papaya',
+    'Sushi','Taco','Burrito','Dumpling','Noodles','Pancake','Waffle','Croissant','Pretzel','Donut',
+    'Falafel','Hummus','Kebab','Lasagna','Risotto','Curry','Cheesecake','Brownie','Pudding','Marshmallow',
+    'Archaeologist','Librarian','Florist','Carpenter','Plumber','Electrician','Baker','Lifeguard','Magician','Journalist',
+    'Referee','Coach','Sailor','Gardener','Tailor','Barber','Veterinarian','Paramedic','Architect','Translator',
+    'Origami','Knitting','Juggling','Karaoke','Hide and Seek','Tug of War','Hopscotch','Badminton','Fencing','Rock Climbing',
+    'Northern Lights','Rainbow','Thunderstorm','Snowflake','Meteor','Comet','Eclipse','Fossil','Crystal','Sandcastle',
+    'Treasure Map','Message in a Bottle','Flying Carpet','Crystal Ball','Magic Wand','Crown','Suit of Armor','Treasure Chest'
+])];
+export const ROUND_MS = 156000; // 2.6 minutes = 2 minutes 36 seconds.
 function seededRandom(seed) {
-    let value = seed % 2147483647;
-
-    if (value <= 0) {
-        value += 2147483646;
-    }
-
+    let value = seed >>> 0;
     return () => {
-        value = value * 16807 % 2147483647;
-        return (value - 1) / 2147483646;
+        value += 0x6D2B79F5;
+        let t = Math.imul(value ^ value >>> 15, 1 | value);
+        t ^= t + Math.imul(t ^ t >>> 7, 61 | t);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
 }
-
-function getRoundNumber() {
-    return Math.floor(Date.now() / (5 * 60 * 1000));
+function shuffledDeck(cycle) {
+    const deck = [...words], random = seededRandom(cycle ^ 0x537079);
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    return deck;
 }
-
-function calculateRound(playerCount) {
-    const round = getRoundNumber();
-    const random = seededRandom(round);
-
-    const word = words[Math.floor(random() * words.length)];
-    const spyCount = playerCount >= 7 ? 2 : 1;
-
-    const players = Array.from(
-        { length: playerCount },
-        (_, index) => index + 1
-    );
-
+export function getRoundNumber(time = Date.now()) { return Math.floor(time / ROUND_MS); }
+export function calculateRound(playerCount, round = getRoundNumber()) {
+    const cycle = Math.floor(round / words.length), index = round % words.length;
+    const deck = shuffledDeck(cycle);
+    // Avoid an immediate repeat even across shuffled deck boundaries.
+    const previousLast = shuffledDeck(cycle - 1).at(-1);
+    if (deck[0] === previousLast) [deck[0], deck[1]] = [deck[1], deck[0]];
+    const random = seededRandom(round ^ 0x9e3779b9);
+    const players = Array.from({ length: playerCount }, (_, index) => index + 1);
     for (let i = players.length - 1; i > 0; i--) {
         const j = Math.floor(random() * (i + 1));
         [players[i], players[j]] = [players[j], players[i]];
     }
-
-    return {
-        round,
-        word,
-        spies: players.slice(0, spyCount)
-    };
+    return { round, word: deck[index], spies: players.slice(0, playerCount >= 7 ? 2 : 1) };
 }
 
 function showPlayerSelection(container, playerCount) {
@@ -120,7 +136,7 @@ function startSpy(container, playerCount, currentPlayer) {
 
     function render() {
         clearInterval(timerId);
-        const result = calculateRound(playerCount);
+        const result = calculateRound(playerCount, round);
         const isSpy = result.spies.includes(currentPlayer);
 
         container.innerHTML = `
@@ -175,7 +191,7 @@ function startSpy(container, playerCount, currentPlayer) {
                 return;
             }
             const now = Date.now();
-            const nextRound = (Math.floor(now / (5 * 60 * 1000)) + 1) * 5 * 60 * 1000;
+            const nextRound = (Math.floor(now / ROUND_MS) + 1) * ROUND_MS;
             const remaining = nextRound - now;
 
             const minutes = Math.floor(remaining / 60000);
@@ -252,6 +268,7 @@ export function openSpy(container) {
 
     if (
         params.get("game") === "spy" &&
+        Number.isInteger(playerCount) && Number.isInteger(player) &&
         playerCount >= 3 &&
         playerCount <= 10 &&
         player >= 1 &&
