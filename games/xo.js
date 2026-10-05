@@ -74,7 +74,11 @@ export async function openXO(container) {
         if (!current.ages || !current.scores) throw new Error('This room uses the old XO version. Create a new room.');
         if (!Object.values(current.players).includes(user.uid)) {
             const result = await api.runTransaction(target, value => join(value, user.uid), { applyLocally: false });
-            if (!result.committed) throw new Error('This room is full or has already started.');
+            const joinedRoom = result.snapshot.val();
+            if (!joinedRoom) throw new Error('Room not found.');
+            if (!result.committed || !Object.values(joinedRoom.players || {}).includes(user.uid)) {
+                throw new Error('This room is full or has already started.');
+            }
         }
         watch(candidate);
     }

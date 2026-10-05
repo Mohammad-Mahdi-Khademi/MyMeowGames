@@ -5,6 +5,9 @@ export function newRoom(uid) {
         round: 1, completed: 0, scores: { X: 0, O: 0 } };
 }
 export function join(room, uid) {
+    // Firebase may start with an empty local cache. Return null to let the
+    // transaction retry with server data; undefined would abort the join.
+    if (room === null) return null;
     if (!room || room.status !== 'waiting' || room.players.O || room.players.X === uid) return;
     return { ...room, players: { ...room.players, O: uid }, status: 'playing' };
 }
